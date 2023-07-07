@@ -10,10 +10,15 @@
 
 
 ;; Problem 15
+
 ;; Returns a list of two-element lists
 (define (enumerate s)
   ; BEGIN PROBLEM 15
-  'replace-this-line
+  (define (func s i)
+    (cond ((equal? s nil) nil)
+        (else (cons (cons i (cons (car s) nil)) (func (cdr s) (+ i 1)))))
+    )
+    (func s 0)
   )
   ; END PROBLEM 15
 
@@ -23,7 +28,11 @@
 ;; the merged lists.
 (define (merge comp list1 list2)
   ; BEGIN PROBLEM 16
-  'replace-this-line
+  (cond ((equal? list1 nil) list2)
+        ((equal? list2 nil) list1)
+        ((comp (car list1) (car list2)) (cons (car list1) (merge comp (cdr list1) list2)))
+        (else (cons (car list2) (merge comp list1 (cdr list2))))
+  )
   )
   ; END PROBLEM 16
 
@@ -37,7 +46,17 @@
 
 (define (nondecreaselist s)
     ; BEGIN PROBLEM 17
-    'replace-this-line
+    (if (null? s)
+        '()
+        (let ((rest (nondecreaselist (cdr s))))
+            (if (null? rest) (list s)
+            (if (> (car s) (car (car rest)))
+                (cons (list (car s)) rest)
+                (cons (cons (car s) (car rest)) (cdr rest))
+            )
+            )
+        )
+    )
     )
     ; END PROBLEM 17
 
@@ -53,35 +72,32 @@
 
 ;; Converts all let special forms in EXPR into equivalent forms using lambda
 (define (let-to-lambda expr)
-  (cond ((atom? expr)
-         ; BEGIN PROBLEM EC
-         'replace-this-line
-         ; END PROBLEM EC
-         )
-        ((quoted? expr)
-         ; BEGIN PROBLEM EC
-         'replace-this-line
-         ; END PROBLEM EC
-         )
-        ((or (lambda? expr)
-             (define? expr))
-         (let ((form   (car expr))
-               (params (cadr expr))
-               (body   (cddr expr)))
-           ; BEGIN PROBLEM EC
-           'replace-this-line
-           ; END PROBLEM EC
-           ))
-        ((let? expr)
-         (let ((values (cadr expr))
-               (body   (cddr expr)))
-           ; BEGIN PROBLEM EC
-           'replace-this-line
-           ; END PROBLEM EC
-           ))
-        (else
-         ; BEGIN PROBLEM EC
-         'replace-this-line
-         ; END PROBLEM EC
-         )))
+        (cond ((atom? expr) expr)
+
+              ((quoted? expr) expr)
+
+              ((or (lambda? expr) (define? expr))
+               (let ((form   (car expr))
+                     (params (cadr expr))
+                     (body   (cddr expr))
+                    )
+                    (append (list form params) (let-to-lambda body))
+               )
+              )
+              ((let? expr)
+               (let ((values (cadr expr))
+                     (body   (cddr expr))
+                    )
+                 ; BEGIN PROBLEM 19
+                    (cons (cons 'lambda (cons (map let-to-lambda (car (zip values)))(let-to-lambda body))) (map let-to-lambda (cadr (zip values))))
+                 ; END PROBLEM 19
+               )
+              )
+              (else
+               ; BEGIN PROBLEM 19
+               (map let-to-lambda expr)
+               ; END PROBLEM 19
+              )
+        )
+)
 
